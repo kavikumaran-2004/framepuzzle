@@ -4,22 +4,59 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Open Puzzle</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 80px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #2196F3;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
+
+<h2>Opening Puzzle...</h2>
+<p>If nothing happens, tap below.</p>
+
+<a id="openBtn" class="btn">Open App</a>
+
 <script>
   const url = new URL(location.href);
   const pid = url.searchParams.get("pid");
 
   if (!pid) {
-    document.body.innerText = "Missing pid";
+    document.body.innerHTML = "<h2>Invalid Puzzle Link</h2>";
   } else {
-    // Android App Link (adjust scheme/host to match your manifest intent-filter)
-    const appLink = `https://kavikumaran-2004.github.io/framepuzzle/p/?pid=${encodeURIComponent(pid)}`;
 
-    // If app links configured, Android will open the app automatically.
-    // Otherwise user stays here.
-    location.replace(appLink);
+    const packageName = "com.HobbyDeveloper.framepuzzle";
+
+    const intentUrl =
+      `intent://kavikumaran-2004.github.io/framepuzzle/p?pid=${encodeURIComponent(pid)}`
+      + `#Intent;scheme=https;package=${packageName};end`;
+
+    // Set button link
+    document.getElementById("openBtn").href = intentUrl;
+
+    // Try auto-open
+    window.location.href = intentUrl;
+
+    // Fallback to Play Store after 2 seconds
+    setTimeout(() => {
+      window.location.href =
+        "https://play.google.com/store/apps/details?id=" + packageName +
+        "&referrer=pid%3D" + encodeURIComponent(pid);
+    }, 2000);
   }
 </script>
+
 </body>
 </html>
