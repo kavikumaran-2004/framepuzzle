@@ -4,59 +4,56 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Open Puzzle</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding-top: 80px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 12px 20px;
-      background: #2196F3;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      margin-top: 20px;
-    }
-  </style>
 </head>
 <body>
-
-<h2>Opening Puzzle...</h2>
-<p>If nothing happens, tap below.</p>
-
-<a id="openBtn" class="btn">Open App</a>
+<h3>Opening Puzzle…</h3>
 
 <script>
   const url = new URL(location.href);
   const pid = url.searchParams.get("pid");
 
   if (!pid) {
-    document.body.innerHTML = "<h2>Invalid Puzzle Link</h2>";
+    document.body.innerHTML = "<h3>Missing pid</h3>";
   } else {
-
     const packageName = "com.HobbyDeveloper.framepuzzle";
 
+    // ✅ IMPORTANT: keep the trailing slash because your page is /p/index.html
+    const httpsAppLink =
+      `https://kavikumaran-2004.github.io/framepuzzle/p/?pid=${encodeURIComponent(pid)}`;
+
+    // ✅ intent:// for Android Chrome
     const intentUrl =
-      `intent://kavikumaran-2004.github.io/framepuzzle/p?pid=${encodeURIComponent(pid)}`
+      `intent://kavikumaran-2004.github.io/framepuzzle/p/?pid=${encodeURIComponent(pid)}`
       + `#Intent;scheme=https;package=${packageName};end`;
 
-    // Set button link
-    document.getElementById("openBtn").href = intentUrl;
-
-    // Try auto-open
+    // Try open app
     window.location.href = intentUrl;
 
-    // Fallback to Play Store after 2 seconds
+    // ✅ Only go Play Store if user is still on this page (app didn't open)
+    const fallbackTimer = setTimeout(() => {
+      if (!document.hidden) {
+        window.location.href =
+          "https://play.google.com/store/apps/details?id=" + packageName +
+          "&referrer=pid%3D" + encodeURIComponent(pid);
+      }
+    }, 1800);
+
+    // ✅ If app opens, browser loses focus/visibility -> cancel Play Store redirect
+    const cancelFallback = () => clearTimeout(fallbackTimer);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) cancelFallback();
+    });
+    window.addEventListener("pagehide", cancelFallback);
+    window.addEventListener("blur", cancelFallback);
+
+    // Optional: If intent is blocked, at least show the https link
     setTimeout(() => {
-      window.location.href =
-        "https://play.google.com/store/apps/details?id=" + packageName +
-        "&referrer=pid%3D" + encodeURIComponent(pid);
-    }, 2000);
+      if (!document.hidden) {
+        document.body.innerHTML =
+          `<h3>Tap to open:</h3><a href="${httpsAppLink}">${httpsAppLink}</a>`;
+      }
+    }, 400);
   }
 </script>
-
 </body>
 </html>
