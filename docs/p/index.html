@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Frame Puzzle</title>
+</head>
+<body>
+  <p>Redirecting to Frame Puzzle…</p>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id") || "";
+
+    const pkg = "com.HobbyDeveloper.framepuzzle";
+    const play = "https://play.google.com/store/apps/details?id=" + pkg;
+
+    // Optional: keep puzzle id for post-install attribution
+    const withReferrer = play + "&referrer=" + encodeURIComponent("puzzleId=" + id);
+
+    location.replace(withReferrer);
+  </script>
+</body>
+</html>
