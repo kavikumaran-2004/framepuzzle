@@ -9,51 +9,51 @@
 <h3>Opening Puzzle…</h3>
 
 <script>
-  const url = new URL(location.href);
-  const pid = url.searchParams.get("pid");
+(function () {
+  // Incoming: https://kavikumaran-2004.github.io/framepuzzle/p/<pid>
+  var path = window.location.pathname || "";
+  var parts = path.split("/").filter(Boolean);
+
+  // parts: ["framepuzzle","p","<pid>"]
+  var pid = "";
+  var pIndex = parts.indexOf("p");
+  if (pIndex >= 0 && pIndex + 1 < parts.length) pid = parts[pIndex + 1];
 
   if (!pid) {
     document.body.innerHTML = "<h3>Missing pid</h3>";
-  } else {
-    const packageName = "com.HobbyDeveloper.framepuzzle";
-
-    // ✅ IMPORTANT: keep the trailing slash because your page is /p/index.html
-    const httpsAppLink =
-      `https://kavikumaran-2004.github.io/framepuzzle/p/?pid=${encodeURIComponent(pid)}`;
-
-    // ✅ intent:// for Android Chrome
-    const intentUrl =
-      `intent://kavikumaran-2004.github.io/framepuzzle/p/?pid=${encodeURIComponent(pid)}`
-      + `#Intent;scheme=https;package=${packageName};end`;
-
-    // Try open app
-    window.location.href = intentUrl;
-
-    // ✅ Only go Play Store if user is still on this page (app didn't open)
-    const fallbackTimer = setTimeout(() => {
-      if (!document.hidden) {
-        window.location.href =
-          "https://play.google.com/store/apps/details?id=" + packageName +
-          "&referrer=pid%3D" + encodeURIComponent(pid);
-      }
-    }, 1800);
-
-    // ✅ If app opens, browser loses focus/visibility -> cancel Play Store redirect
-    const cancelFallback = () => clearTimeout(fallbackTimer);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) cancelFallback();
-    });
-    window.addEventListener("pagehide", cancelFallback);
-    window.addEventListener("blur", cancelFallback);
-
-    // Optional: If intent is blocked, at least show the https link
-    setTimeout(() => {
-      if (!document.hidden) {
-        document.body.innerHTML =
-          `<h3>Tap to open:</h3><a href="${httpsAppLink}">${httpsAppLink}</a>`;
-      }
-    }, 400);
+    return;
   }
+
+  var packageName = "com.HobbyDeveloper.framepuzzle";
+
+  // Open app via custom scheme (your app parses ?pid=)
+  var intentUrl =
+    "intent://puzzle?pid=" + encodeURIComponent(pid) +
+    "#Intent;scheme=framepuzzle;package=" + packageName + ";end";
+
+  // Play Store fallback (includes referrer pid=...)
+  var playStore =
+    "https://play.google.com/store/apps/details?id=" + packageName +
+    "&referrer=pid%3D" + encodeURIComponent(pid);
+
+  // Try open app
+  window.location.replace(intentUrl);
+
+  // If app didn't open, go to Play Store
+  var fallbackTimer = setTimeout(function () {
+    if (!document.hidden) window.location.replace(playStore);
+  }, 1400);
+
+  // Cancel fallback if app opens
+  function cancel() { clearTimeout(fallbackTimer); }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) cancel();
+  });
+  window.addEventListener("pagehide", cancel);
+  window.addEventListener("blur", cancel);
+
+})();
 </script>
+
 </body>
 </html>
