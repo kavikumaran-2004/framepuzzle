@@ -9,51 +9,36 @@
 <h3>Opening Puzzle…</h3>
 
 <script>
-(function () {
-  // Incoming: https://kavikumaran-2004.github.io/framepuzzle/p/<pid>
-  var path = window.location.pathname || "";
-  var parts = path.split("/").filter(Boolean);
-
-  // parts: ["framepuzzle","p","<pid>"]
-  var pid = "";
-  var pIndex = parts.indexOf("p");
-  if (pIndex >= 0 && pIndex + 1 < parts.length) pid = parts[pIndex + 1];
+  const url = new URL(location.href);
+  const pid = url.searchParams.get("pid");
 
   if (!pid) {
     document.body.innerHTML = "<h3>Missing pid</h3>";
-    return;
+  } else {
+    const packageName = "com.HobbyDeveloper.framepuzzle";
+
+    const playStore =
+      "https://play.google.com/store/apps/details?id=" + packageName +
+      "&referrer=pid%3D" + encodeURIComponent(pid);
+
+    // ✅ Correct intent: opens framepuzzle://puzzle?pid=...
+    const intentUrl =
+      "intent://puzzle?pid=" + encodeURIComponent(pid) +
+      "#Intent;scheme=framepuzzle;package=" + packageName + ";end";
+
+    window.location.replace(intentUrl);
+
+    const fallbackTimer = setTimeout(() => {
+      if (!document.hidden) window.location.replace(playStore);
+    }, 1400);
+
+    const cancelFallback = () => clearTimeout(fallbackTimer);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) cancelFallback();
+    });
+    window.addEventListener("pagehide", cancelFallback);
+    window.addEventListener("blur", cancelFallback);
   }
-
-  var packageName = "com.HobbyDeveloper.framepuzzle";
-
-  // Open app via custom scheme (your app parses ?pid=)
-  var intentUrl =
-    "intent://puzzle?pid=" + encodeURIComponent(pid) +
-    "#Intent;scheme=framepuzzle;package=" + packageName + ";end";
-
-  // Play Store fallback (includes referrer pid=...)
-  var playStore =
-    "https://play.google.com/store/apps/details?id=" + packageName +
-    "&referrer=pid%3D" + encodeURIComponent(pid);
-
-  // Try open app
-  window.location.replace(intentUrl);
-
-  // If app didn't open, go to Play Store
-  var fallbackTimer = setTimeout(function () {
-    if (!document.hidden) window.location.replace(playStore);
-  }, 1400);
-
-  // Cancel fallback if app opens
-  function cancel() { clearTimeout(fallbackTimer); }
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) cancel();
-  });
-  window.addEventListener("pagehide", cancel);
-  window.addEventListener("blur", cancel);
-
-})();
 </script>
-
 </body>
 </html>
