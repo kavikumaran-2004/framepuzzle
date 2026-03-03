@@ -21,23 +21,20 @@
       "https://play.google.com/store/apps/details?id=" + packageName +
       "&referrer=pid%3D" + encodeURIComponent(pid);
 
-    // ✅ Correct intent: opens framepuzzle://puzzle?pid=...
     const intentUrl =
-      "intent://puzzle?pid=" + encodeURIComponent(pid) +
-      "#Intent;scheme=framepuzzle;package=" + packageName + ";end";
+      "intent://kavikumaran-2004.github.io/framepuzzle/p/?pid=" + encodeURIComponent(pid) +
+      "#Intent;scheme=https;package=" + packageName + ";end";
 
     window.location.replace(intentUrl);
 
-    const fallbackTimer = setTimeout(() => {
+    const t = setTimeout(() => {
       if (!document.hidden) window.location.replace(playStore);
     }, 1400);
 
-    const cancelFallback = () => clearTimeout(fallbackTimer);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) cancelFallback();
-    });
-    window.addEventListener("pagehide", cancelFallback);
-    window.addEventListener("blur", cancelFallback);
+    const cancel = () => clearTimeout(t);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) cancel(); });
+    window.addEventListener("pagehide", cancel);
+    window.addEventListener("blur", cancel);
   }
 </script>
 </body>
